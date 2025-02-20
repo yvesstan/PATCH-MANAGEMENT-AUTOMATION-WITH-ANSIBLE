@@ -1,0 +1,44 @@
+---
+- name: Install OSSEC on Ubuntu
+  hosts: webserver
+  become: yes
+  tasks:
+    - name: Update the package list
+      apt:
+        update_cache: yes
+
+    - name: Install required dependencies
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - wget
+        - curl
+        - unzip
+        - make
+        - gcc
+        - build-essential
+        - libapache2-mod-php
+        - apache2-utils
+        - sendmail
+        - inotify-tools
+
+    - name: Download OSSEC
+      command: >
+        wget https://github.com/ossec/ossec-hids/archive/refs/tags/3.6.0.tar.gz -O /tmp/ossec-hids.tar.gz
+
+    - name: Extract OSSEC
+      unarchive:
+        src: /tmp/ossec-hids.tar.gz
+        dest: /tmp/
+        remote_src: yes
+
+    - name: Install OSSEC
+      command: >
+        /tmp/ossec-hids-3.6.0/install.sh
+      args:
+        creates: /var/ossec
+
+    - name: Configure OSSEC
+      command: >
+        /var/ossec/bin/ossec-control enable

@@ -1,0 +1,66 @@
+---
+- name: Automate CVE Discovery on Linux
+  hosts: webserver
+  become: yes
+  vars:
+    # Define the package manager and the tool for CVE scanning
+    package_manager: apt
+    cve_tool: "lynis"
+    result_path: "/home/master/lynis_cve_scan.log"
+    result_dir: "/home/master"
+
+  tasks:
+    - name: Update the package list
+      apt:
+        update_cache: yes
+      tags:
+        - update
+
+    - name: Install required packages
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - "{{ cve_tool }}"
+        - "curl"
+      tags:
+        - install
+
+    - name: Create result directory if it does not exist
+      file:
+        path: "{{ result_dir }}" command: "{{ cve_tool }} audit system"
+      register: lynis_output
+      tags:
+        - scan
+
+    - name: Save CVE scan results to a file on target node
+      copy:
+        content: "{{ lynis_output.stdout }}"
+        dest: "{{ result_path }}"
+      tags:
+        - save
+
+    - name: Fetch CVE scan results to Ansible master node
+      fetch:
+        src: "{{ result_path }}"
+        dest: "/home/master/lynis_cve_scan_{{ inventory_hostname }}.log"
+        flat: yes
+      tags:
+        - fetch
+
+
+
+    - name: Clean up unused packages and dependencies
+      apt:
+        autoremove: yes
+      tags:
+        - cleanup
+
+        state: directory
+        mode: '0755'
+      tags:
+        - create_dir
+
+    - name: Run CVE scan using Lynis
+
+      

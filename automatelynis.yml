@@ -1,0 +1,306 @@
+---
+- name: Automate Lynis Suggestions
+  hosts: workstation
+  become: yes
+  vars:
+    grub_password: "your_secure_password"  # Replace with a secure password
+    users:
+      - slave2
+  tasks:
+    - name: Check for updates
+      command: apt-get update
+      tags: 
+        - update
+
+    - name: Install libpam-tmpdir
+      apt:
+        name: libpam-tmpdir
+        state: present
+      tags: 
+        - install
+
+    - name: Install apt-listbugs
+     apt:
+       name: apt-listbugs
+       state: present
+     tags: 
+       - install
+
+    - name: Install apt-listchanges
+      apt:
+        name: apt-listchanges
+        state: present
+      tags: 
+        - install
+
+    - name: Install needrestart
+      apt:
+        name: needrestart
+        state: present
+      tags: 
+        - install
+
+    - name: Install fail2ban
+      apt:
+        name: fail2ban
+        state: present
+      tags: 
+        - install
+
+    - name: Set GRUB password
+      command: >
+        echo -e "set superusers=\"root\"\npassword_pbkdf2 root $(echo -n "{{ grub_password }}" | grub-mkpasswd-pbkdf2 | grep -oP '(?<=grub.pbkdf2.sha512.10000.).*')" >> /etc/grub.d/40_custom
+      tags: 
+        - grub
+
+    - name: Update GRUB configuration
+      command: update-grub
+      tags: 
+        - grub
+
+    - name: Disable core dumps
+      lineinfile:
+        path: /etc/security/limits.conf
+        line: "* hard core 0"
+        create: yes
+      tags: 
+        - config
+
+    - name: Configure password hashing rounds
+      lineinfile:
+        path: /etc/login.defs
+        regexp: '^PASS_MAX_DAYS'
+        line: 'PASS_MAX_DAYS 90'
+      tags: 
+        - config
+
+    - name: Set password expiration dates
+      command: chage -M 90 -m 7 -W 14 slave2  # Replace 'username' with actual usernames
+      with_items:
+        - user1
+        - user2
+      tags: 
+        - config
+
+    - name: Remove locked accounts
+      user:
+        name: "{{ item }}"
+        state: absent
+      with_items:
+        - user1
+        - user2
+      tags: 
+        - config
+
+    - name: Configure minimum password age
+      lineinfile:
+        path: /etc/login.defs
+        regexp: '^PASS_MIN_DAYS'
+        line: 'PASS_MIN_DAYS 7'
+      tags: 
+        - config
+
+    - name: Configure maximum password age
+      lineinfile:
+        path: /etc/login.defs
+        regexp: '^PASS_MAX_DAYS'
+        line: 'PASS_MAX_DAYS 90'
+      tags: 
+        - config
+
+    - name: Set default umask
+      lineinfile:
+        path: /etc/login.defs
+        regexp: '^UMASK'
+        line: 'UMASK 027'
+      tags: 
+        - config
+
+    - name: Install debsums
+      apt:
+        name: debsums
+        state: present
+      tags: 
+        - install
+
+    - name: Update APT package list
+      apt:
+        update_cache: yes
+
+    - name: Upgrade all packages
+      apt:
+        upgrade: dist
+
+    - name: Install apt-show-versions
+      apt:
+        name: apt-show-versions
+        state: present
+      tags: 
+        - install
+
+    - name: Disable USB storage
+      lineinfile:
+        path: /etc/modprobe.d/blacklist.conf
+        line: 'blacklist usb-storage'
+        create: yes
+      tags: 
+        - config
+
+    - name: Install Apache mod_evasive
+      apt:
+        name: libapache2-mod-evasive
+        state: present
+      tags: 
+        - install
+
+    - name: Install Apache modsecurity
+      apt:
+        name: libapache2-mod-security2
+        state: present
+      tags: 
+        - install
+
+    - name: Harden SSH configuration
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^AllowTcpForwarding'
+        line: 'AllowTcpForwarding no'
+      tags: 
+        - ssh
+
+    - name: Harden SSH configuration
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^ClientAliveCountMax'
+        line: 'ClientAliveCountMax 2'
+      tags: 
+        - ssh
+
+    - name: Harden SSH configuration
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^Compression'
+        line: 'Compression no'
+      tags: 
+        - ssh
+
+    - name: Harden SSH configuration
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^LogLevel'
+        line: 'LogLevel VERBOSE'
+      tags: 
+        - ssh
+
+    - name: Harden SSH configuration
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^MaxAuthTries'
+        line: 'MaxAuthTries 3'
+      tags: 
+        - ssh
+
+    - name: Harden SSH configuration
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^MaxSessions'
+        line: 'MaxSessions 2'
+      tags: 
+        - ssh
+
+    - name: Harden SSH configuration
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^TCPKeepAlive'
+        line: 'TCPKeepAlive no'
+      tags: 
+        - ssh
+
+    - name: Harden SSH configuration
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^X11Forwarding'
+        line: 'X11Forwarding no'
+      tags: 
+        - ssh
+
+    - name: Harden SSH configuration
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^AllowAgentForwarding'
+        line: 'AllowAgentForwarding no'
+      tags: 
+        - ssh
+
+    - name: Enable auditd
+      apt:
+        name: auditd
+        state: present
+      tags: 
+        - install
+
+    - name: Enable sysstat
+      apt:
+        name: sysstat
+        state: present
+      tags: 
+        - install
+
+    - name: Enable process accounting
+      apt:
+        name: acct
+        state: present
+      tags: 
+        - install
+
+    - name: Add legal banner to /etc/issue
+      lineinfile:
+        path: /etc/issue
+        line: 'Authorized uses only. All activity may be monitored and reported.'
+        create: yes
+      tags: 
+        - banner
+
+    - name: Add legal banner to /etc/issue.net
+      lineinfile:
+        path: /etc/issue.net
+        line: 'Authorized uses only. All activity may be monitored and reported.'
+        create: yes
+      tags: 
+        - banner
+
+    - name: Enable logging to external host
+      lineinfile:
+        path: /etc/rsyslog.conf
+        line: '*.* @loghost.example.com'  # Replace with your log host
+        create: yes
+      tags: 
+        - logging
+
+    - name: Restart rsyslog
+      service:
+        name: rsyslog
+        state: restarted
+      tags: 
+        - logging
+
+    - name: Install rkhunter
+      apt:
+        name: rkhunter
+        state: present
+      tags: 
+        - install
+
+    - name: Install chkrootkit
+      apt:
+        name: chkrootkit
+        state: present
+      tags: 
+        - install
+
+    - name: Install OSSEC
+      apt:
+        name: ossec-hids
+        state: present
+      tags: 
+        - install
