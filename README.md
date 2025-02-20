@@ -86,6 +86,7 @@ Convert the scan results:
 ```sh
 cat /home/master/lynis_cve_scan.log | aha > /home/master/lynis_cve_scan.html
 ```
+![](https://github.com/yvesstan/Cloud-Projects/blob/main/LabPic/videoframe_9645.png)
 
 ---
 
@@ -95,9 +96,12 @@ Once vulnerabilities are identified, we can automate the remediation process by 
 
 ### 📜 Playbook: `automatelynis.yml`
 Check the contents of this file in the repository for the remediation steps implemented.
+![](https://github.com/yvesstan/Cloud-Projects/blob/main/LabPic/automatelynis.png)
 
 ### ⚠️ Possible Errors & Fixes
 If you encounter an error in the task **`Install OSSEC`**, you will find a separate playbook named **`ossec.yml`** that resolves this issue.
+
+![](https://github.com/yvesstan/Cloud-Projects/blob/main/LabPic/ossec.png)
 
 ---
 
@@ -109,7 +113,7 @@ Feel free to **contribute, suggest improvements, or reach out** for discussions!
 ---
 
 ## 📌 Connect with Me
-[![GitHub](https://img.shields.io/badge/GitHub-Profile-black?logo=github)](https://github.com/yourusername) [![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue?logo=linkedin)](https://linkedin.com/in/yourprofile)
+[![GitHub](https://img.shields.io/badge/GitHub-Profile-black?logo=github)](https://github.com/yvesstan) [![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue?logo=linkedin)](https://www.linkedin.com/in/yves-stanislas-adani/)
 
 ---
 
